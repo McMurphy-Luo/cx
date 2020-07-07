@@ -1,0 +1,17 @@
+看山是山，看山不是山，看山还是山
+
+constexpr
+variadic templates/tuple/apply
+rvalue references
+lambda expressions
+
+<regex>
+<optional>
+<chrono>
+<string_view>
+<any>
+<filesystem>
+<variant>
+
+不在本次探讨范围内：
+thread and atomic

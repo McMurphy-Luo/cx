@@ -1,4 +1,4 @@
-看山是山，看山不是山，看山还是山
+知识的搬运工
 
 constexpr
 variadic templates/tuple/apply

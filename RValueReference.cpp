@@ -4,7 +4,7 @@ int Noop(int argument) {
   return argument;
 }
 
-class TestRValueReference {
+class TestClass {
 public:
   static bool constructor_is_called;
   static bool copy_constructor_is_called;
@@ -12,15 +12,20 @@ public:
   static bool move_constructor_is_called;
   static bool move_assignment_is_called;
 
-  static void CheckConstruction(
+  static bool CheckConstruction(
     bool constructor,
     bool copy_constructor, bool copy_assignment,
     bool move_constructor, bool move_assignment) {
-    CHECK(constructor == constructor_is_called);
-    CHECK(copy_constructor == copy_constructor_is_called);
-    CHECK(copy_assignment == copy_assignment_is_called);
-    CHECK(move_constructor == move_constructor_is_called);
-    CHECK(move_assignment == move_assignment_is_called);
+    return
+      constructor == constructor_is_called
+      &&
+      copy_constructor == copy_constructor_is_called
+      &&
+      copy_assignment == copy_assignment_is_called
+      &&
+      move_constructor == move_constructor_is_called
+      &&
+      move_assignment == move_assignment_is_called;
   }
 
   static void ResetConstructionFlags() {
@@ -32,35 +37,50 @@ public:
   }
 
 public:
-  TestRValueReference(int int_member)
+  TestClass(int int_member)
     : int_member_(int_member) {
     constructor_is_called = true;
   }
 
-  TestRValueReference(TestRValueReference&& rhs)
-    : int_member_(rhs.int_member_) {
+  TestClass(const TestClass& another)
+    : int_member_(another.int_member_){
+    copy_constructor_is_called = true;
+  }
+
+  TestClass& operator=(const TestClass& another) {
+    if (this == &another) {
+      return *this;
+    }
+    int_member_ = another.int_member_;
+    copy_assignment_is_called = true;
+    return *this;
+  }
+
+  TestClass(TestClass&& rhs) noexcept
+    : int_member_(rhs.int_member_)  {
     rhs.int_member_ = -1;
     move_constructor_is_called = true;
   }
 
-  TestRValueReference& operator=(TestRValueReference&& rhs) {
+  TestClass& operator=(TestClass&& rhs) {
     if (this == &rhs) {
       return *this;
     }
     int_member_ = rhs.int_member_;
     rhs.int_member_ = -1;
     move_assignment_is_called = true;
+    return *this;
   }
 
 public:
   int int_member_;
 };
 
-bool TestRValueReference::constructor_is_called = false;
-bool TestRValueReference::copy_constructor_is_called = false;
-bool TestRValueReference::copy_assignment_is_called = false;
-bool TestRValueReference::move_constructor_is_called = false;
-bool TestRValueReference::move_assignment_is_called = false;
+bool TestClass::constructor_is_called = false;
+bool TestClass::copy_constructor_is_called = false;
+bool TestClass::copy_assignment_is_called = false;
+bool TestClass::move_constructor_is_called = false;
+bool TestClass::move_assignment_is_called = false;
 
 namespace
 {
@@ -184,23 +204,6 @@ TEST_CASE("Test RValue Reference") {
   // int&& rvalue_reference_5 = const_lvalue_reference; // 右值引用不能绑定const 左值引用
 }
 
-TEST_CASE("Test Miscellanea") {
-  int&& test_rvalue_reference = 5 + 6;
-  CHECK(test_rvalue_reference == 11);
-  int* p_rvalue_reference = &test_rvalue_reference;
-  CHECK(p_rvalue_reference != nullptr);
-
-  TestRValueReference&& test_rvalue_reference_2 = TestRValueReference{ 5 };
-  CHECK(test_rvalue_reference_2.int_member_ == 5);
-  TestRValueReference* p_object = &test_rvalue_reference_2;
-  CHECK(p_object != nullptr);
-
-  const TestRValueReference& test_const_lvalue_reference = TestRValueReference(3);
-  CHECK(test_const_lvalue_reference.int_member_ == 3);
-  const TestRValueReference* p_const_object = &test_const_lvalue_reference;
-  CHECK(p_const_object->int_member_ == 3);
-}
-
 TEST_CASE("Test Reference Functions") {
   int value = -5;
   int& lvalue_reference = value;
@@ -252,10 +255,6 @@ TEST_CASE("Test Reference Functions") {
   FunctionTakesReferenceOverloadedInt(std::move(test_rvalue_reference), 10); // std::move 无条件转换为右值
   CheckFunctionCheckReferencesIntCalledFlags(false, true); // 调用右值引用版本
 
-  test_rvalue_reference = 15;
-  ResetFunctionTakesReferencesIntCalledFlags();
-  FunctionTakesReferenceOverloadedInt(std::forward<int>(test_rvalue_reference), 15); // std::forward 根据传入值自动返回左值引用或右值引用
-  CheckFunctionCheckReferencesIntCalledFlags(false, true);
   /**
    * template<typename... T>
    * void TestImpl(const T&) {
@@ -275,13 +274,70 @@ TEST_CASE("Test Reference Functions") {
    */
 }
 
-template<typename T>
-void ForwardReferenceFunction(T&&) {
+TEST_CASE("Test Miscellanea") {
+  int&& rvalue_reference = 5 + 6;
+  CHECK(rvalue_reference == 11);
+  int* p_rvalue_reference = &rvalue_reference;
+  CHECK(p_rvalue_reference != nullptr);
 
+  TestClass::ResetConstructionFlags();
+  TestClass&& rvalue_reference_2 = TestClass{ 5 };
+  CHECK(TestClass::CheckConstruction(true, false, false, false, false));
+  CHECK(rvalue_reference_2.int_member_ == 5);
+  TestClass* p_object = &rvalue_reference_2;
+  CHECK(p_object != nullptr);
+
+  TestClass::ResetConstructionFlags();
+  const TestClass& const_lvalue_reference = TestClass(3);
+  CHECK(TestClass::CheckConstruction(true, false, false, false, false));
+  CHECK(const_lvalue_reference.int_member_ == 3);
+  const TestClass* p_const_object = &const_lvalue_reference;
+  CHECK(p_const_object->int_member_ == 3);
+
+  TestClass::ResetConstructionFlags();
+  TestClass value = rvalue_reference_2;
+  CHECK(TestClass::CheckConstruction(false, true, false, false, false));
+
+  TestClass::ResetConstructionFlags();
+  value.int_member_ = 99;
+  TestClass value_2 = std::move(value);
+  CHECK(TestClass::CheckConstruction(false, false, false, true, false));
+  CHECK(value_2.int_member_ == 99);
+  CHECK(value.int_member_ == -1); // 移动构造函数不影响对象本身
+  p_object = &value;
+  CHECK(p_object->int_member_ == -1);
+
+  TestClass::ResetConstructionFlags();
+  TestClass value_3 = std::move(const_lvalue_reference);
+  CHECK(TestClass::CheckConstruction(false, true, false, false, false));
+  CHECK(const_lvalue_reference.int_member_ == 3);
+  CHECK(value_3.int_member_ == 3);
+}
+
+template<typename T>
+void ForwardReferenceFunction(T&& item) {
+  using ItemType = std::remove_reference_t<T>;
+  std::vector<ItemType> vector;
+  vector.push_back(std::forward<T>(item));
 }
 
 TEST_CASE("Test Forward Reference") {
+  TestClass object(9);
+  TestClass::ResetConstructionFlags();
+  ForwardReferenceFunction(object);
+  CHECK(TestClass::CheckConstruction(false, true, false, false, false));
+  CHECK(object.int_member_ == 9);
 
+  TestClass object_2(9);
+  TestClass::ResetConstructionFlags();
+  ForwardReferenceFunction(std::move(object_2));
+  CHECK(TestClass::CheckConstruction(false, true, false, false, false));
+  // CHECK(TestClass::CheckConstruction(false, true, false, false, false)); // Todo: change move constructor to noexcept
+
+  TestClass object_3(10);
+  TestClass::ResetConstructionFlags();
+  ForwardReferenceFunction(std::forward<TestClass>(object_2));
+  CHECK(TestClass::CheckConstruction(false, true, false, false, false));
 }
 
 void Conclusion() {

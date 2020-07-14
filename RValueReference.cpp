@@ -88,35 +88,35 @@ namespace
   bool function_takes_rvalue_reference_int_is_called = false;
 }
 
-void FunctionTakesReferenceOverloadedInt(const int& argument, int value) {
+void ReferenceBoth(const int& argument, int value) {
   CHECK(argument == value);
   function_takes_lvalue_reference_int_is_called = true;
 }
 
-void FunctionTakesReferenceOverloadedInt(int&& argument, int value) {
+void ReferenceBoth(int&& argument, int value) {
   CHECK(argument == value);
   function_takes_rvalue_reference_int_is_called = true;
 }
 
-void CheckFunctionCheckReferencesIntCalledFlags(bool l_value_reference, bool r_value_reference) {
+void CheckFunctionTakeReferenceBothCalledFlags(bool l_value_reference, bool r_value_reference) {
   CHECK(function_takes_lvalue_reference_int_is_called == l_value_reference);
   CHECK(function_takes_rvalue_reference_int_is_called == r_value_reference);
 }
 
-void ResetFunctionTakesReferencesIntCalledFlags() {
+void ResetFunctionTakeReferenceBothCalledFlags() {
   function_takes_lvalue_reference_int_is_called = false;
   function_takes_rvalue_reference_int_is_called = false;
 }
 
-void FunctionOnlyTakesLValueReference(int& argument, int value) {
+void LValueReferenceOnly(int& argument, int value) {
   CHECK(argument == value);
 }
 
-void FunctionOnlyTakesRValueReference(int&& argument, int value) {
+void RValueReferenceOnly(int&& argument, int value) {
   CHECK(argument == value);
 }
 
-void FunctionOnlyTakesConstLValueReference(const int& argument, int value) {
+void ConstLValueReferenceOnly(const int& argument, int value) {
   CHECK(argument == value);
 }
 
@@ -210,50 +210,50 @@ TEST_CASE("Test Reference Functions") {
   int&& rvalue_reference = 5 + 6; // 右值引用不能绑定到左值
   const int& const_lvalue_reference = 19;
 
-  FunctionOnlyTakesLValueReference(value, -5);
-  // FunctionOnlyTakesLValueReference(3 + 9, 12);
-  FunctionOnlyTakesLValueReference(lvalue_reference, -5);
-  FunctionOnlyTakesLValueReference(rvalue_reference, 11);
-  // FunctionOnlyTakesLValueReference(const_lvalue_reference, 11);
+  LValueReferenceOnly(value, -5);
+  // LValueReferenceOnly(3 + 9, 12);
+  LValueReferenceOnly(lvalue_reference, -5);
+  LValueReferenceOnly(rvalue_reference, 11);
+  // LValueReferenceOnly(const_lvalue_reference, 11);
 
-  // FunctionOnlyTakesRValueReference(value, -5); // 右值引用不能绑定到左值
-  FunctionOnlyTakesRValueReference(5 + 6, 11);
-  // FunctionOnlyTakesRValueReference(lvalue_reference, -5); // 右值引用不能绑定左值引用
-  // FunctionOnlyTakesRValueReference(const_lvalue_reference, 11); // 右值引用不能绑定const左值引用
-  // FunctionOnlyTakesRValueReference(rvalue_reference, 15); // 右值引用不能绑定左值
+  // RValueReferenceOnly(value, -5); // 右值引用不能绑定到左值
+  RValueReferenceOnly(5 + 6, 11);
+  // RValueReferenceOnly(lvalue_reference, -5); // 右值引用不能绑定左值引用
+  // RValueReferenceOnly(const_lvalue_reference, 11); // 右值引用不能绑定const左值引用
+  // RValueReferenceOnly(rvalue_reference, 15); // 右值引用不能绑定左值
 
-  FunctionOnlyTakesConstLValueReference(value, -5);
-  FunctionOnlyTakesConstLValueReference(3 + 19, 22);
-  FunctionOnlyTakesConstLValueReference(lvalue_reference, -5);
-  FunctionOnlyTakesConstLValueReference(rvalue_reference, 11);
-  FunctionOnlyTakesConstLValueReference(const_lvalue_reference, 19);
+  ConstLValueReferenceOnly(value, -5);
+  ConstLValueReferenceOnly(3 + 19, 22);
+  ConstLValueReferenceOnly(lvalue_reference, -5);
+  ConstLValueReferenceOnly(rvalue_reference, 11);
+  ConstLValueReferenceOnly(const_lvalue_reference, 19);
 
   /*===================================================================================================*/
 
-  ResetFunctionTakesReferencesIntCalledFlags();
-  FunctionTakesReferenceOverloadedInt(3 + 3, 6);
-  CheckFunctionCheckReferencesIntCalledFlags(false, true); // 调用右值引用版本
+  ResetFunctionTakeReferenceBothCalledFlags();
+  ReferenceBoth(3 + 3, 6);
+  CheckFunctionTakeReferenceBothCalledFlags(false, true); // 调用右值引用版本
 
-  ResetFunctionTakesReferencesIntCalledFlags();
-  FunctionTakesReferenceOverloadedInt(Noop(99), 99);
-  CheckFunctionCheckReferencesIntCalledFlags(false, true); // 调用右值引用版本
+  ResetFunctionTakeReferenceBothCalledFlags();
+  ReferenceBoth(Noop(99), 99);
+  CheckFunctionTakeReferenceBothCalledFlags(false, true); // 调用右值引用版本
 
   int&& test_rvalue_reference = 9 + 12;
-  ResetFunctionTakesReferencesIntCalledFlags();
-  FunctionTakesReferenceOverloadedInt(test_rvalue_reference, 21);
-  CheckFunctionCheckReferencesIntCalledFlags(true, false); // 调用左值引用版本
+  ResetFunctionTakeReferenceBothCalledFlags();
+  ReferenceBoth(test_rvalue_reference, 21);
+  CheckFunctionTakeReferenceBothCalledFlags(true, false); // 调用左值引用版本
 
-  ResetFunctionTakesReferencesIntCalledFlags();
-  FunctionTakesReferenceOverloadedInt(test_rvalue_reference = 9, 9);
-  CheckFunctionCheckReferencesIntCalledFlags(true, false); // 调用左值引用版本
+  ResetFunctionTakeReferenceBothCalledFlags();
+  ReferenceBoth(test_rvalue_reference = 9, 9);
+  CheckFunctionTakeReferenceBothCalledFlags(true, false); // 调用左值引用版本
 
   // test_rvalue_reference为左值
   // 借助编译原理的思路+标准的定义才能区分左值和右值
 
   test_rvalue_reference = 10;
-  ResetFunctionTakesReferencesIntCalledFlags();
-  FunctionTakesReferenceOverloadedInt(std::move(test_rvalue_reference), 10); // std::move 无条件转换为右值
-  CheckFunctionCheckReferencesIntCalledFlags(false, true); // 调用右值引用版本
+  ResetFunctionTakeReferenceBothCalledFlags();
+  ReferenceBoth(std::move(test_rvalue_reference), 10); // std::move 无条件转换为右值
+  CheckFunctionTakeReferenceBothCalledFlags(false, true); // 调用右值引用版本
 
   /**
    * template<typename... T>
@@ -288,7 +288,7 @@ TEST_CASE("Test Miscellanea") {
   CHECK(p_object != nullptr);
 
   TestClass::ResetConstructionFlags();
-  const TestClass& const_lvalue_reference = TestClass(3);
+  const TestClass& const_lvalue_reference = TestClass{ 3 };
   CHECK(TestClass::CheckConstruction(true, false, false, false, false));
   CHECK(const_lvalue_reference.int_member_ == 3);
   const TestClass* p_const_object = &const_lvalue_reference;
@@ -315,31 +315,79 @@ TEST_CASE("Test Miscellanea") {
 }
 
 template<typename T>
-void ForwardReferenceFunction(T&& item) {
+void ForwardReference_1(T&& item) {
+  using ItemType = std::remove_reference_t<T>;
+  std::vector<ItemType> vector;
+  vector.push_back(item);
+}
+
+template<typename T>
+void ForwardReference_2(T&& item) {
+  using ItemType = std::remove_reference_t<T>;
+  std::vector<ItemType> vector;
+  vector.push_back(std::forward<ItemType>(item));
+}
+
+template<typename T>
+void ForwardReference_3(T&& item) {
   using ItemType = std::remove_reference_t<T>;
   std::vector<ItemType> vector;
   vector.push_back(std::forward<T>(item));
 }
 
 TEST_CASE("Test Forward Reference") {
-  TestClass object(9);
+  TestClass object_1{ 9 };
   TestClass::ResetConstructionFlags();
-  ForwardReferenceFunction(object);
+  ForwardReference_1(std::move(object_1));
   CHECK(TestClass::CheckConstruction(false, true, false, false, false));
-  CHECK(object.int_member_ == 9);
 
-  TestClass object_2(9);
+  TestClass object_2{ 11 };
   TestClass::ResetConstructionFlags();
-  ForwardReferenceFunction(std::move(object_2));
-  CHECK(TestClass::CheckConstruction(false, true, false, false, false));
-  // CHECK(TestClass::CheckConstruction(false, true, false, false, false)); // Todo: change move constructor to noexcept
+  ForwardReference_2(object_2);
+  CHECK(TestClass::CheckConstruction(false, false, false, true, false));
+  CHECK(object_2.int_member_ == -1);
 
-  TestClass object_3(10);
+  TestClass object_3{ 321 };
   TestClass::ResetConstructionFlags();
-  ForwardReferenceFunction(std::forward<TestClass>(object_2));
+  TestClass object_4 = std::forward<TestClass>(object_3);
+  CHECK(TestClass::CheckConstruction(false, false, false, true, false));
+  CHECK(object_3.int_member_ == -1);
+
+  TestClass object_5{ 1000 };
+  TestClass::ResetConstructionFlags();
+  ForwardReference_3(object_5);
   CHECK(TestClass::CheckConstruction(false, true, false, false, false));
+
+  // TestClass object_6(987);
+  // ForwardReference_3<TestClass>(object_6);
 }
 
-void Conclusion() {
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void Conclusion() {
+  "1. 如果你有函数形如SetValue(const Widget&)，那么同时提供一份SetValue(Widget&&)是个不错的注意。剩下的让编译器决定。"
+  "2. 给有是移动构造函数，最好是noexcept";
 }

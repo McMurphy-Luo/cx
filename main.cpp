@@ -9,8 +9,8 @@ namespace
 
     "rvalue references";
     "variadic templates / tuple / apply";
-    "lambda expressions";
 
+    "<functional>"
     "<regex>";
     "<optional>";
     "<chrono>";

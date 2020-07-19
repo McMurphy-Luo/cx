@@ -4,83 +4,86 @@ int Noop(int argument) {
   return argument;
 }
 
-class TestClass {
-public:
-  static bool constructor_is_called;
-  static bool copy_constructor_is_called;
-  static bool copy_assignment_is_called;
-  static bool move_constructor_is_called;
-  static bool move_assignment_is_called;
+namespace
+{
+  class TestClass {
+  public:
+    static bool constructor_is_called;
+    static bool copy_constructor_is_called;
+    static bool copy_assignment_is_called;
+    static bool move_constructor_is_called;
+    static bool move_assignment_is_called;
 
-  static bool CheckConstruction(
-    bool constructor,
-    bool copy_constructor, bool copy_assignment,
-    bool move_constructor, bool move_assignment) {
-    return
-      constructor == constructor_is_called
-      &&
-      copy_constructor == copy_constructor_is_called
-      &&
-      copy_assignment == copy_assignment_is_called
-      &&
-      move_constructor == move_constructor_is_called
-      &&
-      move_assignment == move_assignment_is_called;
-  }
+    static bool CheckConstruction(
+      bool constructor,
+      bool copy_constructor, bool copy_assignment,
+      bool move_constructor, bool move_assignment) {
+      return
+        constructor == constructor_is_called
+        &&
+        copy_constructor == copy_constructor_is_called
+        &&
+        copy_assignment == copy_assignment_is_called
+        &&
+        move_constructor == move_constructor_is_called
+        &&
+        move_assignment == move_assignment_is_called;
+    }
 
-  static void ResetConstructionFlags() {
-    constructor_is_called = false;
-    copy_constructor_is_called = false;
-    copy_assignment_is_called = false;
-    move_constructor_is_called = false;
-    move_assignment_is_called = false;
-  }
+    static void ResetConstructionFlags() {
+      constructor_is_called = false;
+      copy_constructor_is_called = false;
+      copy_assignment_is_called = false;
+      move_constructor_is_called = false;
+      move_assignment_is_called = false;
+    }
 
-public:
-  TestClass(int int_member)
-    : int_member_(int_member) {
-    constructor_is_called = true;
-  }
+  public:
+    TestClass(int int_member)
+      : int_member_(int_member) {
+      constructor_is_called = true;
+    }
 
-  TestClass(const TestClass& another)
-    : int_member_(another.int_member_){
-    copy_constructor_is_called = true;
-  }
+    TestClass(const TestClass& another)
+      : int_member_(another.int_member_) {
+      copy_constructor_is_called = true;
+    }
 
-  TestClass& operator=(const TestClass& another) {
-    if (this == &another) {
+    TestClass& operator=(const TestClass& another) {
+      if (this == &another) {
+        return *this;
+      }
+      int_member_ = another.int_member_;
+      copy_assignment_is_called = true;
       return *this;
     }
-    int_member_ = another.int_member_;
-    copy_assignment_is_called = true;
-    return *this;
-  }
 
-  TestClass(TestClass&& rhs) noexcept
-    : int_member_(rhs.int_member_)  {
-    rhs.int_member_ = -1;
-    move_constructor_is_called = true;
-  }
+    TestClass(TestClass&& rhs) noexcept
+      : int_member_(rhs.int_member_) {
+      rhs.int_member_ = -1;
+      move_constructor_is_called = true;
+    }
 
-  TestClass& operator=(TestClass&& rhs) {
-    if (this == &rhs) {
+    TestClass& operator=(TestClass&& rhs) {
+      if (this == &rhs) {
+        return *this;
+      }
+      int_member_ = rhs.int_member_;
+      rhs.int_member_ = -1;
+      move_assignment_is_called = true;
       return *this;
     }
-    int_member_ = rhs.int_member_;
-    rhs.int_member_ = -1;
-    move_assignment_is_called = true;
-    return *this;
-  }
 
-public:
-  int int_member_;
-};
+  public:
+    int int_member_;
+  };
 
-bool TestClass::constructor_is_called = false;
-bool TestClass::copy_constructor_is_called = false;
-bool TestClass::copy_assignment_is_called = false;
-bool TestClass::move_constructor_is_called = false;
-bool TestClass::move_assignment_is_called = false;
+  bool TestClass::constructor_is_called = false;
+  bool TestClass::copy_constructor_is_called = false;
+  bool TestClass::copy_assignment_is_called = false;
+  bool TestClass::move_constructor_is_called = false;
+  bool TestClass::move_assignment_is_called = false;
+}
 
 namespace
 {
@@ -386,8 +389,10 @@ TEST_CASE("Test Forward Reference") {
 
 
 
-
-void Conclusion() {
-  "1. 如果你有函数形如SetValue(const Widget&)，那么同时提供一份SetValue(Widget&&)是个不错的注意。剩下的让编译器决定。"
-  "2. 给有是移动构造函数，最好是noexcept";
+namespace
+{
+  void Conclusion() {
+    "1. 如果你有函数形如SetValue(const Widget&)，那么同时提供一份SetValue(Widget&&)是个不错的注意。剩下的让编译器决定。"
+      "2. 给有是移动构造函数，最好是noexcept";
+  }
 }

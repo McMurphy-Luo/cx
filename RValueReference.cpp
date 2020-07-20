@@ -1,11 +1,11 @@
 #include "catch.hpp"
 
-int Noop(int argument) {
-  return argument;
-}
-
 namespace
 {
+  int Noop(int argument) {
+    return argument;
+  }
+
   class TestClass {
   public:
     static bool constructor_is_called;
@@ -83,44 +83,41 @@ namespace
   bool TestClass::copy_assignment_is_called = false;
   bool TestClass::move_constructor_is_called = false;
   bool TestClass::move_assignment_is_called = false;
-}
 
-namespace
-{
   bool function_takes_lvalue_reference_int_is_called = false;
   bool function_takes_rvalue_reference_int_is_called = false;
-}
 
-void ReferenceBoth(const int& argument, int value) {
-  CHECK(argument == value);
-  function_takes_lvalue_reference_int_is_called = true;
-}
+  void ReferenceBoth(const int& argument, int value) {
+    CHECK(argument == value);
+    function_takes_lvalue_reference_int_is_called = true;
+  }
 
-void ReferenceBoth(int&& argument, int value) {
-  CHECK(argument == value);
-  function_takes_rvalue_reference_int_is_called = true;
-}
+  void ReferenceBoth(int&& argument, int value) {
+    CHECK(argument == value);
+    function_takes_rvalue_reference_int_is_called = true;
+  }
 
-void CheckFunctionTakeReferenceBothCalledFlags(bool l_value_reference, bool r_value_reference) {
-  CHECK(function_takes_lvalue_reference_int_is_called == l_value_reference);
-  CHECK(function_takes_rvalue_reference_int_is_called == r_value_reference);
-}
+  void CheckFunctionTakeReferenceBothCalledFlags(bool l_value_reference, bool r_value_reference) {
+    CHECK(function_takes_lvalue_reference_int_is_called == l_value_reference);
+    CHECK(function_takes_rvalue_reference_int_is_called == r_value_reference);
+  }
 
-void ResetFunctionTakeReferenceBothCalledFlags() {
-  function_takes_lvalue_reference_int_is_called = false;
-  function_takes_rvalue_reference_int_is_called = false;
-}
+  void ResetFunctionTakeReferenceBothCalledFlags() {
+    function_takes_lvalue_reference_int_is_called = false;
+    function_takes_rvalue_reference_int_is_called = false;
+  }
 
-void LValueReferenceOnly(int& argument, int value) {
-  CHECK(argument == value);
-}
+  void LValueReferenceOnly(int& argument, int value) {
+    CHECK(argument == value);
+  }
 
-void RValueReferenceOnly(int&& argument, int value) {
-  CHECK(argument == value);
-}
+  void RValueReferenceOnly(int&& argument, int value) {
+    CHECK(argument == value);
+  }
 
-void ConstLValueReferenceOnly(const int& argument, int value) {
-  CHECK(argument == value);
+  void ConstLValueReferenceOnly(const int& argument, int value) {
+    CHECK(argument == value);
+  }
 }
 
 namespace
@@ -317,25 +314,28 @@ TEST_CASE("Test Miscellanea") {
   CHECK(value_3.int_member_ == 3);
 }
 
-template<typename T>
-void ForwardReference_1(T&& item) {
-  using ItemType = std::remove_reference_t<T>;
-  std::vector<ItemType> vector;
-  vector.push_back(item);
-}
+namespace
+{
+  template<typename T>
+  void ForwardReference_1(T&& item) {
+    using ItemType = std::remove_reference_t<T>;
+    std::vector<ItemType> vector;
+    vector.push_back(item);
+  }
 
-template<typename T>
-void ForwardReference_2(T&& item) {
-  using ItemType = std::remove_reference_t<T>;
-  std::vector<ItemType> vector;
-  vector.push_back(std::forward<ItemType>(item));
-}
+  template<typename T>
+  void ForwardReference_2(T&& item) {
+    using ItemType = std::remove_reference_t<T>;
+    std::vector<ItemType> vector;
+    vector.push_back(std::forward<ItemType>(item));
+  }
 
-template<typename T>
-void ForwardReference_3(T&& item) {
-  using ItemType = std::remove_reference_t<T>;
-  std::vector<ItemType> vector;
-  vector.push_back(std::forward<T>(item));
+  template<typename T>
+  void ForwardReference_3(T&& item) {
+    using ItemType = std::remove_reference_t<T>;
+    std::vector<ItemType> vector;
+    vector.push_back(std::forward<T>(item));
+  }
 }
 
 TEST_CASE("Test Forward Reference") {

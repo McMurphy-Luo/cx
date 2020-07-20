@@ -19,7 +19,7 @@ namespace
     "<filesystem>";
     "<variant>";
 
-    "不在本次探讨范围内：";
+    "力有不逮，不在本次探讨范围内：";
     "thread and atomic";
   }
 }

@@ -1,20 +1,23 @@
 #include "catch.hpp"
 #include <functional>
 
-class TestClass {
-public:
-  TestClass(int value)
-    : value_(value) {
+namespace
+{
+  class TestClass {
+  public:
+    TestClass(int value)
+      : value_(value) {
 
-  }
+    }
 
-  int Calculate(int argument) {
-    return value_ + argument;
-  }
-  
-private:
-  int value_;
-};
+    int Calculate(int argument) {
+      return value_ + argument;
+    }
+
+  private:
+    int value_;
+  };
+}
 
 TEST_CASE("Test Bind and PlaceHolders") {
   TestClass test_object_1(5);

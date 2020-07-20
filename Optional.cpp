@@ -69,4 +69,9 @@ TEST_CASE("Test Optional") {
   CHECK(string_optional_1.value() == "ZoomTest");
   Optional<string> string_optional_2 = string_optional_1;
   CHECK(string_optional_2.value() == "ZoomTest");
+  string_optional_1 = "TestTestTest";
+  CHECK(string_optional_1.value() == "TestTestTest");
+  Optional<std::vector<string>> vector_optional = std::vector<string>{ "Test_1", "ABCD" };
+  CHECK(vector_optional.value().size() == 2);
+  CHECK(vector_optional.value().at(1) == "ABCD");
 }

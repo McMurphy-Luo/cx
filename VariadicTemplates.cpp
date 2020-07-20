@@ -40,10 +40,10 @@ TEST_CASE("Test Varadic Int") {
 }
 
 template<typename... T>
-size_t IntTypeCount() {
+size_t IntTypeCountError() {
   size_t int_count = 0;
   for (size_t i = 0; i < sizeof...(T); ++i) {
-    if (std::is_same_v<
+    if constexpr (std::is_same_v<
       int,
       std::tuple_element_t<i, std::tuple<T...>>
     >) {
@@ -51,6 +51,12 @@ size_t IntTypeCount() {
     }
   }
   return int_count;
+}
+
+template<typename... T>
+size_t IntTypeCount() {
+  std::array<int, sizeof...(T)> int_count = { (std::is_same_v<T, int> ? 1 : 0)... };
+  return std::count(std::begin(int_count), std::end(int_count), 1);
 }
 
 template<typename... T>
@@ -63,7 +69,12 @@ template<>
 struct IntCount<> : std::integral_constant<size_t, 0> {};
 
 TEST_CASE("Test Int Type Count") {
-  // CHECK(IntTypeCount<int, int, string>() == 2);
+  //CHECK(IntTypeCountError<int>() == 0);
+  CHECK(IntTypeCount<>() == 0);
+  CHECK(IntTypeCount<int>() == 1);
+  CHECK(IntTypeCount<int, uintptr_t>() == 1);
+  CHECK(IntTypeCount<string>() == 0);
+  CHECK(IntTypeCount<int, int, vector<int>, string>() == 2);
   CHECK(IntCount<>::value == 0);
   CHECK(IntCount<int>::value == 1);
   CHECK(IntCount<int, int>::value == 2);

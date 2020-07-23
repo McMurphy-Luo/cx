@@ -220,17 +220,6 @@ public:
   int* value;
 };
 
-union TestUnion {
-  long value_long;
-  // std::string value_string;
-  int value_int;
-};
-
-TEST_CASE("Test Union") {
-  TestUnion union_one;
-  (void)union_one;
-}
-
 TEST_CASE("Test Variant") {
   TestVariant<int, std::string, std::vector<std::string>> test_variant_1(std::string{ "TestTest222" });
   CHECK(test_variant_1.index() == 1);

@@ -392,7 +392,7 @@ TEST_CASE("Test Forward Reference") {
 namespace
 {
   void Conclusion() {
-    "1. 如果你有函数形如SetValue(const Widget&)，那么同时提供一份SetValue(Widget&&)是个不错的注意。剩下的让编译器决定。"
-      "2. 给有是移动构造函数，最好是noexcept";
+    "1. 如果你有函数形如SetValue(const Widget&)，那么可以考虑同时提供一份SetValue(Widget&&)。剩下的让编译器决定。"
+    "2. 给有是移动构造函数，最好是noexcept";
   }
 }

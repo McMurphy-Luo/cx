@@ -19,8 +19,11 @@ namespace
     "<filesystem>";
     "<variant>";
 
-    "力有不逮，不在本次探讨范围内：";
-    "thread and atomic";
+    "力有不逮，深感惭愧：";
+    "constexpr, auto";
+    "thread, memory model and atomic";
+    "attributes";
+    "others";
   }
 }
 
@@ -34,6 +37,5 @@ int main(int argc, char* argv[]) {
   _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
   _CrtSetBreakAlloc(-1);
   int result = Catch::Session().run(argc, argv);
-  _CrtDumpMemoryLeaks();
   return result;
 }

@@ -207,19 +207,6 @@ namespace
   using TestVariant = Variant<T...>;
 }
 
-class ClassOfDestrutor {
-public:
-  ClassOfDestrutor()
-    : value(new int{5}) {
-
-  }
-
-  ~ClassOfDestrutor() {
-    delete value;
-  }
-  int* value;
-};
-
 TEST_CASE("Test Variant") {
   TestVariant<int, std::string, std::vector<std::string>> test_variant_1(std::string{ "TestTest222" });
   CHECK(test_variant_1.index() == 1);

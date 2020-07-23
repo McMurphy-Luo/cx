@@ -1,6 +1,17 @@
 #include "catch.hpp"
 #include <variant>
 
+union TestUnion {
+  long value_long;
+  // std::string value_string;
+  int value_int;
+};
+
+TEST_CASE("Test Union") {
+  TestUnion union_one;
+  (void)union_one;
+}
+
 namespace
 {
   template<typename T>

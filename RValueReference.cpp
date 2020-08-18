@@ -147,7 +147,7 @@ TEST_CASE("Test LValue Reference") {
   // int& test_lvalue_reference_2 = 5; // 5 literal 不是左值
 
   // int& test_lvalue_reference_3 = 2 + 3; // 左值引用不能绑定到右值
-  // FunctionOnlyTakesLValueReference(5 + 6, 11); // 左值引用不能绑定到右值
+  // LValueReferenceOnly(5 + 6, 11); // 左值引用不能绑定到右值
 
   int& test_lvalue_reference_4 = lvalue_reference; // 左值引用可以绑定左值引用
   lvalue_reference = 2;

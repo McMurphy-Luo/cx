@@ -81,7 +81,7 @@ namespace
 }
 
 TEST_CASE("Test Int Type Count") {
-  //CHECK(IntTypeCountError<int>() == 0);
+  // CHECK(IntTypeCountError<int>() == 0);
   CHECK(IntTypeCount<>() == 0);
   CHECK(IntTypeCount<int>() == 1);
   CHECK(IntTypeCount<int, uintptr_t>() == 1);

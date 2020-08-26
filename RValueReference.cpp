@@ -1,4 +1,5 @@
 #include "catch.hpp"
+#include <iostream>
 
 namespace
 {
@@ -250,6 +251,18 @@ TEST_CASE("Test Reference Functions") {
   // test_rvalue_reference为左值
   // 借助编译原理的思路+标准的定义才能区分左值和右值
 
+  /*
+   * std::string test = "2123" + 2;
+   * 
+   *                      =  <lvalue> {std::string}
+   *       test <lvalue>                            + { const char* } <rvalue>
+   *       {std::string}            "2123" <pvalue>                             2 <pvalue>
+   *                               { const char[5] }                              { int }
+   * 
+   * std::string test = "2123" + 2;
+   * CHECK(test == "23");
+   * CHECK(std::is_same_v<decltype("2123" + 2), const char *>);
+   */
   test_rvalue_reference = 10;
   ResetFunctionTakeReferenceBothCalledFlags();
   ReferenceBoth(std::move(test_rvalue_reference), 10); // std::move 无条件转换为右值

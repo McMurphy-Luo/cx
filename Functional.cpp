@@ -72,3 +72,56 @@ TEST_CASE("Test Lambda Expression") {
   };
   CHECK(!test_object_1.IsValid());
 }
+
+class TestCaptureThis {
+public:
+  TestCaptureThis(int value)
+    : value_(value) {
+
+  }
+
+  TestCaptureThis(const TestCaptureThis&) = delete;
+  TestCaptureThis& operator=(const TestCaptureThis&) = delete;
+
+  ~TestCaptureThis() {
+    value_ = -1;
+  }
+  /*
+  std::function<int()> Capture() const {
+    return [this]() -> int {
+      return value_;
+    };
+  }
+  
+  std::function<int()> Capture() const {
+    return [this]() -> int {
+      return this->value_;
+    };
+  }
+
+  std::function<int()> Capture(int value_) const {
+    return [this]() -> int {
+      return value_;
+    };
+  }
+  */
+  // Prefer 
+  std::function<int()> Capture() const {
+    return [t = this]() -> int {
+      return t->value_;
+    };
+  }
+  
+  int value_;
+};
+
+TEST_CASE("Test Capture This") {
+  TestCaptureThis test_object_1(11);
+  std::function<int()> lambda = test_object_1.Capture();
+  CHECK(lambda() == 11);
+  {
+    TestCaptureThis test_object_2(5);
+    lambda = test_object_2.Capture();
+  }
+  CHECK(lambda() == -1);
+}
